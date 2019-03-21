@@ -58,11 +58,11 @@ class MaxHeap {
   }
 
   size() {
-    
+
   }
 
   isEmpty() {
-    
+
   }
 
   clear() {
@@ -85,28 +85,84 @@ class MaxHeap {
 
   shiftNodeUp(node) {
     if (node.parent.priority < node.priority) {
-      const nodeIndexInParentNodes = this.parentNodes.findIndex(parentNode =>
-        parentNode.priority === node.priority
+      const indexesNodesInParentNodes = [node, node.parent].map(checkingNode =>
+        this.parentNodes.findIndex(parentNode => parentNode.priority === checkingNode.priority)
       );
-      const nodeParentIndexInParentNodes = this.parentNodes.findIndex(parentNode =>
-        parentNode.priority === node.parent.priority
-      );
-      if (
-        nodeIndexInParentNodes !== -1
-        && nodeParentIndexInParentNodes !== -1
-      ) {
-        this.parentNodes[nodeIndexInParentNodes] = node.parent;
-        this.parentNodes[nodeParentIndexInParentNodes] = node;
-      } else if (nodeIndexInParentNodes !== -1) {
-        this.parentNodes[nodeIndexInParentNodes] = node.parent;
+      // const nodeIndexInParentNodes = this.parentNodes.findIndex(parentNode =>
+      //   parentNode.priority === node.priority
+      // );
+      // const nodeParentIndexInParentNodes = this.parentNodes.findIndex(parentNode =>
+      //   parentNode.priority === node.parent.priority
+      // );
+
+      // toDo доделать обработку nodeParents
+      indexesNodesInParentNodes.forEach((indexInParentNodes, i) => {
+        if (indexInParentNodes !== -1 && i === 0) {
+          this.parentNodes[indexesNodesInParentNodes[0]] = node.parent;
+        }
+        if (indexInParentNodes !== -1 && i === 0) {
+          this.parentNodes[indexesNodesInParentNodes[0]] = node.parent;
+        }
+      })
+      if (indexesNodesInParentNodes.every(index => index !== -1)) { // по индексу 0 - node, 1 - node.parent
+        this.parentNodes[indexesNodesInParentNodes[0]] = node.parent;
+        this.parentNodes[indexesNodesInParentNodes[1]] = node;
+      } else if (indexesNodesInParentNodes[0] !== -1) {
+        this.parentNodes[indexesNodesInParentNodes[0]] = node.parent;
       }
       node.swapWithParent();
       this.shiftNodeUp(node);
     }
-
   }
 
   shiftNodeDown(node) {
+    const comparisonNodes = [node];
+    if (node.left) comparisonNodes.push(node.left);
+    if (node.right) comparisonNodes.push(node.left);
+    if (comparisonNodes.length === 1) return;
+
+    const maxNode = comparisonNodes.reduce((maxPriorityNode, curNode) => {
+      if (maxPriorityNode.priority < curNode.priority) {
+        return maxPriorityNode = curNode;
+      }
+    });
+
+    if (maxNode.priority === node.priority) return;
+
+    const indexesNodesInParentNodes = [node, maxNode].map(checkingNode =>
+      this.parentNodes.findIndex(parentNode => parentNode.priority === checkingNode.priority)
+    );
+
+    if (indexesNodesInParentNodes.every(index => index !== -1)) { // по индексу 0 - node, 1 - потомок с наибольшим priority
+      this.parentNodes[indexesNodesInParentNodes[0]] = node.parent;
+      this.parentNodes[indexesNodesInParentNodes[1]] = node;
+    } else if (indexesNodesInParentNodes[0] !== -1) {
+      this.parentNodes[indexesNodesInParentNodes[0]] = node.parent;
+    }
+
+    const getDirection = {
+      withRightNode: () => {
+        let direction = null;
+        if (
+          node.priority < node.left.priority
+          && node.left.priority > node.right.priority
+        ) {
+          direction = 'left';
+        } else if (
+          node.priority < node.right.priority
+          && node.right.priority > node.left.priority
+        ) {
+          direction = 'right';
+        }
+        return direction;
+      },
+      withoutRightNode: () => {
+        let direction = ''
+        if (node.priority < node.left.priority) {
+          direction = 'left';
+        }
+      },
+    };
     const conditionAction = {
       withRightNode: () => {
         if (
