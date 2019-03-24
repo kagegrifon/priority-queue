@@ -11,7 +11,7 @@ class Node {
     if (this.left === null) {
       this.left = node;
       node.parent = this;
-    } else if (this.right !== null) {
+    } else if (this.right === null) {
       this.right = node;
       node.parent = this;
     }
@@ -19,13 +19,15 @@ class Node {
 
   removeChild(node) {
     if (
-      node.data === this.left.data
+      this.left !== null
+      && node.data === this.left.data
       && node.priority === this.left.priority
     ) {
       this.left = null;
       node.parent = null;
     } else if (
-      node.data === this.right.data
+      this.right !== null
+      && node.data === this.right.data
       && node.priority === this.right.priority
     ) {
       this.right = null;
@@ -37,21 +39,38 @@ class Node {
 
   remove() {
     if (this.parent !== null) {
-      this.parent.removeChild.apply(this.parent, [this]);
+      this.parent.removeChild.call(this.parent, this);
     }
   }
 
   swapWithParent() {
     if (this.parent !== null) {
-      const buffer = {
-        data: this.data,
-        priority: this.priority,
-      };
+      const { left: parentLeft, right: parentRight, parent: parentParent } = this.parent;
+      const { left, right, parent } = this;
 
-      this.data = this.parent.data;
-      this.priority = this.parent.priority;
-      this.parent.data = buffer.data;
-      this.parent.priority = buffer.priority;
+      [left, right, parentLeft, parentRight, parent].forEach(node => {
+        if (node !== null) node.remove();
+      });
+
+      [left, right].forEach(node => {
+        if (node !== null) parent.appendChild(node);
+      });
+
+      [parentLeft, parentRight].forEach(node => {
+        if (node !== null) {
+          if (
+            node.priority === this.priority
+            && node.data === this.data
+          ) {
+            this.appendChild(parent);
+          } else {
+            this.appendChild(node);
+          }
+        }
+      });
+      if (parentParent !== null) {
+        parentParent.appendChild(this);
+      }
     }
   }
 }

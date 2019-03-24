@@ -7,7 +7,7 @@ class PriorityQueue {
   }
 
   push(data, priority) {
-    if (data >= 0 && data <= this.maxSize) {
+    if (this.heap.size() !== this.maxSize) {
       this.heap.push(data, priority);
     } else {
       throw new Error();
@@ -15,20 +15,21 @@ class PriorityQueue {
   }
 
   shift() {
-    // написать условие выкидывания ошибки при отсутствии значений
-    if (this.heap.queue.length === 0) {
+    if (this.heap.isEmpty()) {
       throw new Error();
     }
-    return this.heap.pop(); // возможно нужно переделать возврат значения
+    return this.heap.pop();
   }
 
   size() {
-    return this.heap.queue.length; // переделать
+    return this.heap.size();
   }
 
   isEmpty() {
-    return this.heap.queue.length === 0; // переделать
+    return this.heap.isEmpty();
   }
 }
 
 module.exports = PriorityQueue;
+
+
